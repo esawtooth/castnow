@@ -47,7 +47,11 @@ var desktop = function(ctx, next) {
 
   route.all('/{idx}', function(req, res) {
     debug('incoming request serving %s', list[req.params.idx].path);
-    serveMp4(req, res, "/tmp/out.mp4");
+    res.setHeader('Content-Type', "video/x-matroska");
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Length', 100000000000);
+    res.statusCode = 200;
+    return fs.createReadStream("/tmp/out.mkv").pipe(res);
   });
 
   http.createServer(route).listen(port);
