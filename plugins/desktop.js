@@ -4,8 +4,9 @@ var router = require('router');
 var path = require('path');
 var serveMp4 = require('../utils/serve-mp4');
 var debug = require('debug')('castnow:localfile');
+var ffmpeg = require('fluent-ffmpeg');
 var fs = require('fs');
-var port = 4100;
+var port = 14100;
 
 var isFile = function(item) {
   return item.path.indexOf('desktop') > -1;
@@ -28,6 +29,9 @@ var desktop = function(ctx, next) {
   var list = ctx.options.playlist.slice(0);
   var ip = (ctx.options.myip || internalIp());
 
+//  var command = ffmpeg(fs.createReadStream('/tmp/final-video.mp4'));
+
+
   ctx.options.playlist = list.map(function(item, idx) {
     if (!isFile(item)) return item;
     return {
@@ -43,7 +47,7 @@ var desktop = function(ctx, next) {
 
   route.all('/{idx}', function(req, res) {
     debug('incoming request serving %s', list[req.params.idx].path);
-    serveMp4(req, res, "/tmp/screen.mp4");
+    serveMp4(req, res, "/tmp/out.mp4");
   });
 
   http.createServer(route).listen(port);
