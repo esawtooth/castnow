@@ -9,6 +9,7 @@ var circulate = require('array-loop');
 var xtend = require('xtend');
 var debug = require('debug')('castnow');
 var noop = function() {};
+require("shelljs/global");
 
 // plugins
 var directories = require('./plugins/directories');
@@ -310,6 +311,8 @@ if (!opts.playlist) {
 }
 
 process.on('SIGINT', function() {
+  exec("ps -ef | grep ffmpeg | awk '{print $2}' | xargs echo");
+  debug("removing all processes with ffmpeg");
   process.exit();
 });
 
