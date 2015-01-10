@@ -49,35 +49,37 @@ var desktop = function(ctx, next) {
   var vlc_path = "/Applications/VLC.app/Contents/MacOS/VLC";
   var fps = "20";
   var inres = "1440x900";
-  //var inres = "1280x800";
+  var inres = "1440x900";
   var outres = "1280x720";
   var coreaudio_device = "Soundflower (2ch)";
   var vlc_video_fifo = "/tmp/vlc-ffmpeg.raw";
   var audio_fifo = "/tmp/sox-ffmpeg.wav";
 
   // recreate the fifos
-  //exec("rm -f " + vlc_video_fifo);
-  //exec("rm -f " + audio_fifo);
-  //exec("mkfifo " + vlc_video_fifo);
-  //exec("mkfifo " + audio_fifo);
+  exec("rm -f " + vlc_video_fifo);
+  exec("rm -f " + audio_fifo);
+  exec("mkfifo " + vlc_video_fifo);
+  exec("mkfifo " + audio_fifo);
 
-  //console.log("Refreshed fifos");
+  console.log("Refreshed fifos");
 
   //exec('sox --buffer 4194304 -q -c 2 -t coreaudio "' + coreaudio_device + '" -t wav ' + audio_fifo + ' &', {async:true});
   //console.log("Launched sox");
-  //exec(vlc_path + ' screen:// :screen-fps="' + fps + '" -I dummy --sout "file/dummy:"' + vlc_video_fifo + ' &', {async:true});
-  //console.log("Launched vlc");
+  exec(vlc_path + ' screen:// :screen-fps="' + fps + '" -I dummy --sout "file/dummy:"' + vlc_video_fifo + ' &', {async:true});
+  console.log("Launched vlc");
 
   // spawn ffmpeg and pipe to res
 
   var ffmpeg = child_process.spawn("/Users/rohit.jain/Personal/src/github/ffmpeg/ffmpeg", [
     '-threads', "0" ,
-    '-f', 'avfoundation', 
-    '-r', '60',
-    '-pixel_format', 'bgr0',
-    '-i', '\"1:0\"',
+    '-f', 'rawvideo', 
+    '-pix_fmt', 'bgra',
+    '-s', inres,
+    '-r', fps,
+    '-i', vlc_video_fifo,
     '-vcodec', 'libx264',
-    '-s', '1280x720',
+    '-s', outres,
+    '-pix_fmt', 'yuv420p',
     '-movflags', 'faststart',
     '-f', 'matroska',
     'pipe:1' // Output on stdout
@@ -96,9 +98,9 @@ var desktop = function(ctx, next) {
   ffmpeg.stderr.on('data', function (data) {
               console.log('stderr: ' + data);
               });
-  ffmpeg.stdout.on('data', function (data) {
-              console.log('stdout: ' + data);
-              });
+  //ffmpeg.stdout.on('data', function (data) {
+  //            console.log('stdout: ' + data);
+  //            });
           
 
   //setTimeout(function() {
